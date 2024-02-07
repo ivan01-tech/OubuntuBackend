@@ -9,6 +9,7 @@ import errLogger from "./middleware/errLogger.js";
 import { corsOptions } from "./config/corsCongif.js";
 import mongoose from "mongoose";
 import dbConnection from "./config/dbConnection.js";
+import usersRoute from "./routes/userRoute.js";
 
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
@@ -37,6 +38,9 @@ app.use("/", express.static(join(process.cwd(), "src", "public")));
 
 // root router
 app.use("/", rootRouter);
+
+// users Route
+app.use("/users", usersRoute);
 
 // catch all routes
 app.all("/*", function (req, res) {
