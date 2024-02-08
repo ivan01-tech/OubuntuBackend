@@ -37,10 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(join(process.cwd(), "src", "public")));
 
 // root router
-app.use("/", rootRouter);
+app.use("/api", rootRouter);
 
 // users Route
-app.use("/users", usersRoute);
+app.use("/api/users", usersRoute);
 
 // catch all routes
 app.all("/*", function (req, res) {
