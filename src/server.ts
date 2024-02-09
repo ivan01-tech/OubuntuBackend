@@ -10,16 +10,21 @@ import { corsOptions } from "./config/corsCongif.js";
 import mongoose from "mongoose";
 import dbConnection from "./config/dbConnection.js";
 import usersRoute from "./routes/userRoute.js";
-
+import session from "express-session";
+import authRoute from "./routes/authRoute.js";
+import { deleteAllDocuments } from "./utils/deleteMany.js";
+import User from "./models/userModel.js";
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
 
 const PORT = process.env.PORT || 3500;
+const secretKey = process.env.EXPRESS_SESSION_KEY!;
+
 const app = express();
 
 // connect to DB
 dbConnection();
-
+// deleteAllDocuments(User);
 // logger middleware
 app.use(logger);
 
@@ -29,15 +34,33 @@ app.use(cookieParser());
 // cors
 app.use(cors(corsOptions));
 
+// session authentication configuration
+const sessionMiddleware = session({
+  secret: secretKey,
+  resave: false, // Don't resave sessions if unmodified
+  saveUninitialized: false, // Don't create empty sessions
+  cookie: {
+    // TODO comme here before deployment
+    maxAge: 1000 * 60 , // Session expires in 1 hour
+    secure: false, // Set to true for HTTPS only
+    httpOnly: false, // Only accessible via HTTP
+  },
+});
 // built in middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// custom middleware
+app.use(sessionMiddleware);
 
 // static files
 app.use("/", express.static(join(process.cwd(), "src", "public")));
 
 // root router
 app.use("/api", rootRouter);
+
+// auth routes
+app.use("/api/auth", authRoute);
 
 // users Route
 app.use("/api/users", usersRoute);

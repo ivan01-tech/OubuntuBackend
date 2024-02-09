@@ -78,6 +78,12 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
+UserSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
+
 export type UserTypes = InferSchemaType<typeof UserSchema>;
 const User = mongoose.model<UserTypes>("User", UserSchema);
 export default User;
