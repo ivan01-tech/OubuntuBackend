@@ -5,12 +5,12 @@ export const requireAuth = (
   res: Response,
   next: NextFunction
 ) => {
-  if (req.session.userId) {
+  if (req.session.userId || req.session.user) {
     next(); // User is authenticated, continue to next middleware
   } else {
-    console.log("first middleware : " , req.session);
+    console.log("session : ", req.session, req.sessionID);
     return res
       .status(403)
-      .json({ status: "error", message: "Authenticated ! please login" });
+      .json({ status: "error", menubar: "UnAuthenticated" });
   }
 };

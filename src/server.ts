@@ -43,7 +43,7 @@ const sessionMiddleware = session({
     // TODO comme here before deployment
     maxAge: 1000 * 60 , // Session expires in 1 hour
     secure: false, // Set to true for HTTPS only
-    httpOnly: false, // Only accessible via HTTP
+    httpOnly: true, // Only accessible via HTTP
   },
 });
 // built in middleware

@@ -30,7 +30,6 @@ export class AuthenticationController {
       }
 
       // check if the password match
-      console.log("first check : ", checkUser.password, password);
       const matchPassword = await bcrypt.compare(password, checkUser.password!);
 
       // the password doesn't match
@@ -41,6 +40,8 @@ export class AuthenticationController {
       req.session.user = checkUser;
       req.session.userId = checkUser._id.toString();
 
+      console.log("session : ", req.session);
+      console.log("sessionID : ", req.sessionID);
       return res.json({
         status: "success",
         message: "successfully logged in",
