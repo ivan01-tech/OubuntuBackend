@@ -18,6 +18,7 @@ import { requiredAdminRoles } from "./middleware/checkUserRoles.js";
 import { requireAuth } from "./middleware/requiredAuth.js";
 import productsRoute from "./routes/productRoute.js";
 import errorHandlerMiddleware from "./middleware/errorMiddleware.js";
+import offersRoute from "./routes/offersRoute.js";
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
 
@@ -74,8 +75,10 @@ app.use("/api/users", usersRoute);
  */
 // make sure that only  get routes are not protected
 // products Routes
-app.use("/api/products",productsRoute);
+app.use("/api/products", productsRoute);
 
+// offers Routes
+app.use("/api/offers", offersRoute);
 
 // catch all routes
 app.all("/*", function (req, res) {
