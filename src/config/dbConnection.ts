@@ -6,7 +6,7 @@ dotenv.config({ path: join(process.cwd(), "src", ".env") });
 const dbConnection = async function () {
   try {
     mongoose.set("strictQuery", true);
-    await mongoose.connect(process.env.DATABASE_URL!);
+    await mongoose.connect(process.env.DATABASE_URL!, {});
   } catch (err) {
     console.log("error : ", err);
   }

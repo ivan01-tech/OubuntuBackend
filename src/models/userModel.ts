@@ -1,64 +1,67 @@
 import mongoose, { InferSchemaType } from "mongoose";
-import { EMAIL_REGEX, PHONE_NUMBER_REGEX, userRoles } from "../constants.js";
+import {
+  EMAIL_REGEX,
+  PHONE_NUMBER_REGEX,
+  USER_ROLES,
+  UserRoles,
+  userRoles,
+} from "../constants.js";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { AfricanCountryCode } from "../utils/CountryCode.js";
 import { MyCustomError } from "../utils/CustomError.js";
 
-const UserSchema = new mongoose.Schema(
-  {
-    first_name: {
-      type: String,
-      require: true,
-      validate: {
-        validator: (value: string) => {
-          return value.length >= 4 && value.length <= 15;
-        },
-        message: "Le prénom doit avoir entre 4 et 15 caractères.",
+const UserSchema = new mongoose.Schema({
+  first_name: {
+    type: String,
+    require: true,
+    validate: {
+      validator: (value: string) => {
+        return value.length >= 4 && value.length <= 15;
       },
-    },
-    country_code: {
-      type: String,
-      enum: AfricanCountryCode,
-      required: true,
-    },
-    created_at: { type: Date, default: Date.now },
-    phone_number: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      validate: {
-        validator: (v: string) => EMAIL_REGEX.test(v),
-        message: (props: any) => `${props.value} n'est pas un email valide!`,
-      },
-    },
-    password: {
-      type: String,
-      require: true,
-    },
-    last_name: {
-      type: String,
-      default: true,
-      validate: {
-        validator: (value: string) => {
-          return value.length >= 4 && value.length <= 15;
-        },
-        message: "Le prénom doit avoir entre 4 et 15 caractères.",
-      },
-    },
-
-    roles: {
-      type: [String],
-      default: [userRoles.is_user],
+      message: "Le prénom doit avoir entre 4 et 15 caractères.",
     },
   },
-  {
-    toJSON: {},
-  }
-);
+  country_code: {
+    type: String,
+    enum: AfricanCountryCode,
+    required: true,
+  },
+  created_at: { type: Date, default: Date.now },
+  phone_number: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: (v: string) => EMAIL_REGEX.test(v),
+      message: (props: any) => `${props.value} n'est pas un email valide!`,
+    },
+  },
+  password: {
+    type: String,
+    require: true,
+  },
+  last_name: {
+    type: String,
+    default: true,
+    validate: {
+      validator: (value: string) => {
+        return value.length >= 4 && value.length <= 15;
+      },
+      message: "Le prénom doit avoir entre 4 et 15 caractères.",
+    },
+  },
+
+  roles: {
+    type: [String],
+    enum: USER_ROLES,
+    required: true,
+    default: [userRoles.is_user],
+  },
+});
 
 // mongoose methods
 UserSchema.methods.validatePhoneNumber = function (

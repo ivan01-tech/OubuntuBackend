@@ -12,6 +12,12 @@ import dbConnection from "./config/dbConnection.js";
 import usersRoute from "./routes/userRoute.js";
 import session from "express-session";
 import authRoute from "./routes/authRoute.js";
+import { deleteAllDocuments } from "./utils/deleteMany.js";
+import User from "./models/userModel.js";
+import { requiredAdminRoles } from "./middleware/checkUserRoles.js";
+import { requireAuth } from "./middleware/requiredAuth.js";
+import productsRoute from "./routes/productRoute.js";
+import errorHandlerMiddleware from "./middleware/errorMiddleware.js";
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
 
@@ -35,11 +41,11 @@ app.use(cors(corsOptions));
 // session authentication configuration
 const sessionMiddleware = session({
   secret: secretKey,
-  // resave: false, // Don't resave sessions if unmodified
+  resave: false, // Don't resave sessions if unmodified
   saveUninitialized: false, // Don't create empty sessions
   cookie: {
     // TODO comme here before deployment
-    maxAge: 1000 * 60 , // Session expires in 1 hour
+    maxAge: 1000 * 60 * 2, // Session expires in 1 hour
     secure: false, // Set to true for HTTPS only
     httpOnly: false, // Only accessible via HTTP
   },
@@ -62,6 +68,14 @@ app.use("/api/auth", authRoute);
 
 // users Route
 app.use("/api/users", usersRoute);
+
+/**
+ * Secure routes defined in here
+ */
+// make sure that only  get routes are not protected
+// products Routes
+app.use("/api/products",productsRoute);
+
 
 // catch all routes
 app.all("/*", function (req, res) {
@@ -91,3 +105,4 @@ mongoose.connection.on("error", (err) => {
 
 // custom error handler
 app.use(errLogger);
+app.use(errorHandlerMiddleware);

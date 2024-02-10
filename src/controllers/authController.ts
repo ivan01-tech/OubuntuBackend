@@ -16,7 +16,7 @@ export class AuthenticationController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        res
+        return res
           .status(400)
           .json({ status: "error", message: "All fields are required!" });
       }
@@ -34,14 +34,13 @@ export class AuthenticationController {
 
       // the password doesn't match
       if (!matchPassword) {
-        res.status(401).json({ message: "Unauthorized", status: "error" });
+       return res.status(401).json({ message: "Unauthorized", status: "error" });
       }
 
       req.session.user = checkUser;
       req.session.userId = checkUser._id.toString();
 
-      console.log("session : ", req.session);
-      console.log("sessionID : ", req.sessionID);
+      console.log("here");
       return res.json({
         status: "success",
         message: "successfully logged in",

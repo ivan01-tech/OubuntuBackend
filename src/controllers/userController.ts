@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import mongoose, { Error } from "mongoose";
 import User from "../models/userModel.js";
 import { MyCustomError } from "../utils/CustomError.js";
+import { ro } from "date-fns/locale";
 
 export class UserController {
   /**
@@ -69,6 +70,7 @@ export class UserController {
           first_name,
           phone_number,
           id: newUser._id,
+          roles: newUser.roles,
         };
         console.log("newuser : ", data);
 
@@ -81,6 +83,80 @@ export class UserController {
         return res
           .status(400)
           .json({ message: "Invalid user data received !", data: newUser });
+      }
+    } catch (error) {
+      // Vérifiez si l'erreur est une erreur de validation de Mongoose
+      if (error instanceof Error.ValidationError) {
+        const validationErrors: { [key: string]: string } = {};
+
+        // Itérer sur les erreurs de validation et les stocker dans un objet
+        Object.keys(error.errors).forEach((key) => {
+          validationErrors[key] = (error as Error.ValidationError).errors[
+            key
+          ].message;
+        });
+
+        res.status(400).json({ errors: validationErrors });
+      } else if (error instanceof MyCustomError) {
+        return res
+          .status(500)
+          .json({ status: "error", message: error.message });
+      } else {
+        console.log("error : ", error);
+        // Si ce n'est pas une erreur de validation, renvoyez une réponse d'erreur générique
+        return res.status(500).json({
+          status: "error",
+          message: "Erreur lors de la création de l'utilisateur.",
+        });
+      }
+    }
+  }
+
+  /**
+   * @desc update user role
+   * @route POST /users/change_role
+   * @access Private
+   * @param req
+   * @param res
+   * @returns
+   */
+  static async changeUserRoles(req: Request, res: Response) {
+    try {
+      const { roles, userId } = req.body;
+
+      if (!roles || !roles.length)
+        return res
+          .status(400)
+          .json({ status: "error", message: "bad credentails !" });
+      console.log("user: ", userId);
+      if (!mongoose.isValidObjectId(userId)) {
+        return res
+          .status(400)
+          .json({ status: "error", message: "Invalid user ID." });
+      }
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: `User with ${userId} not found !`,
+        });
+      }
+
+      user.roles = roles;
+      const update = await user.save();
+      if (update) {
+        return res.status(200).json({
+          status: "success",
+          data: update,
+          message: "successfully changed user role  ",
+        });
+      } else {
+        return res.status(404).json({
+          status: "error",
+          message: `Something went wrong !`,
+        });
       }
     } catch (error) {
       // Vérifiez si l'erreur est une erreur de validation de Mongoose

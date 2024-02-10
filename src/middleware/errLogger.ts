@@ -12,10 +12,7 @@ const errLogger = async function (
     "errLog.log"
   );
   console.log(err.stack);
-
-  // respond to the request
-  const status = req.statusCode ? req.statusCode : 500;
-  res.status(status).json({ message: err.message });
+  _next();
 };
 
 export default errLogger;
