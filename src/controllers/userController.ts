@@ -120,8 +120,8 @@ export class UserController {
    */
   static async getAllUsers(req: Request, res: Response) {
     try {
+      console.log("session : ", req.session, req.sessionID);
       const users = await User.find({}).select("-password").lean().exec();
-
       if (!users.length)
         return res
           .status(404)

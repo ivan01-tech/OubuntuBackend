@@ -12,8 +12,6 @@ import dbConnection from "./config/dbConnection.js";
 import usersRoute from "./routes/userRoute.js";
 import session from "express-session";
 import authRoute from "./routes/authRoute.js";
-import { deleteAllDocuments } from "./utils/deleteMany.js";
-import User from "./models/userModel.js";
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
 
@@ -37,13 +35,13 @@ app.use(cors(corsOptions));
 // session authentication configuration
 const sessionMiddleware = session({
   secret: secretKey,
-  resave: false, // Don't resave sessions if unmodified
+  // resave: false, // Don't resave sessions if unmodified
   saveUninitialized: false, // Don't create empty sessions
   cookie: {
     // TODO comme here before deployment
     maxAge: 1000 * 60 , // Session expires in 1 hour
     secure: false, // Set to true for HTTPS only
-    httpOnly: true, // Only accessible via HTTP
+    httpOnly: false, // Only accessible via HTTP
   },
 });
 // built in middleware

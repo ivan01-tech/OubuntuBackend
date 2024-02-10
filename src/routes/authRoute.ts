@@ -5,6 +5,7 @@ const authRoute = express.Router();
 
 authRoute
   .post("/login", AuthenticationController.login)
-  .post("/logout", AuthenticationController.logout)
+  .get("/logout", AuthenticationController.logout)
+  .get("/status", AuthenticationController.getUserStatus);
 
 export default authRoute;

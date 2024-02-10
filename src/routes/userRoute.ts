@@ -9,7 +9,7 @@ usersRoute
   .post("/", UserController.createUser)
   .get("/", requireAuth, UserController.getAllUsers)
   .delete("/", UserController.deleteUser)
-  .patch("/:userId", requireAuth, UserController.updateUser)
+  .patch("/:userId", UserController.updateUser)
   .get("/:userId", UserController.getUserById);
 
 export default usersRoute;
