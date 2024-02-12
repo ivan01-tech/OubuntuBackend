@@ -1,7 +1,9 @@
 import mongoose, { InferSchemaType } from 'mongoose';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 
-import { EMAIL_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles } from '../constants.js';
+import {
+  EMAIL_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles,
+} from '../constants.js';
 import { AfricanCountryCode } from '../utils/CountryCode.js';
 import { MyCustomError } from '../utils/CustomError.js';
 
