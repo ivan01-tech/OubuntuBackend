@@ -1,13 +1,13 @@
 /node_modules
 /dist
 node_modules/
+node_modules/*
 
 .env
 ./src/logs
 /dist/*
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
-./node_modules/
 ### Node ###
 # Logs
 logs
@@ -143,8 +143,5 @@ dist
 # Serverless Webpack directories
 .webpack/
 
-# Optional stylelint cache
-
 # SvelteKit build / generate output
 .svelte-kit
-/node_modules/
