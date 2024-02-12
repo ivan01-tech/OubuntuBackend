@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import  AdminBroMongoose from "@admin-bro/mongoose";
 import express from "express";
 import { join } from "node:path";
 import cookieParser from "cookie-parser";
@@ -19,6 +20,8 @@ import { requireAuth } from "./middleware/requiredAuth.js";
 import productsRoute from "./routes/productRoute.js";
 import errorHandlerMiddleware from "./middleware/errorMiddleware.js";
 import offersRoute from "./routes/offersRoute.js";
+import AdminBro from "admin-bro";
+import AdminBroExpress from "@admin-bro/express";
 // env var
 dotenv.config({ path: join(process.cwd(), "src", ".env") });
 
@@ -109,3 +112,25 @@ mongoose.connection.on("error", (err) => {
 // custom error handler
 app.use(errLogger);
 app.use(errorHandlerMiddleware);
+
+/** Admin bro config */
+const adminBro = new AdminBro({
+  databases: [],
+  rootPath: "/admin",
+});
+
+const router = AdminBroExpress.buildRouter(adminBro);
+
+app.use(adminBro.options.rootPath, router);
+app.listen(8080, () => console.log("AdminBro is under localhost:8080/admin"));
+
+AdminBro.registerAdapter(AdminBroMongoose);
+
+
+const User = mongoose.model('User', { name: String, email: String, surname: String })
+const AdminBroOptions = {
+  resources: [User],
+}
+const AdminBro = new AdminBro(adminBro)
+const router = AdminBroExpress.buildRouter(adminBro)
+// and add router to express
