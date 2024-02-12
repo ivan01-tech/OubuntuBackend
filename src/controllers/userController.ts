@@ -1,9 +1,12 @@
-import { Request, Response } from "express";
-import bcrypt from "bcrypt";
-import mongoose, { Error } from "mongoose";
-import User from "../models/userModel.js";
-import { MyCustomError } from "../utils/CustomError.js";
-import { ro } from "date-fns/locale";
+/* eslint-disable consistent-return */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable camelcase */
+import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+import mongoose, { Error } from 'mongoose';
+
+import User from '../models/userModel.js';
+import { MyCustomError } from '../utils/CustomError.js';
 
 export class UserController {
   /**
@@ -17,39 +20,25 @@ export class UserController {
   static async createUser(req: Request, res: Response) {
     try {
       const {
-        email,
-        last_name,
-        country_code,
-        first_name,
-        phone_number,
-        password,
+        email, last_name, country_code, first_name, phone_number, password,
       } = req.body;
 
-      if (
-        !email ||
-        !last_name ||
-        !country_code ||
-        !first_name ||
-        !phone_number ||
-        !password
-      )
-        return res
-          .status(400)
-          .json({ status: "error", message: "All fields must be set" });
+      if (!email || !last_name || !country_code || !first_name || !phone_number || !password) {
+        return res.status(400).json({ status: 'error', message: 'All fields must be set' });
+      }
 
       // chek for duplicating
       const user = await User.findOne({
         $or: [{ email }, { phone_number }],
       })
-        .select("-password")
+        .select('-password')
         .lean()
         .exec();
 
-      if (user)
-        //conflict
-        return res
-          .status(409)
-          .json({ status: "Error", message: "The user already exist" });
+      if (user) {
+        // conflict
+        return res.status(409).json({ status: 'Error', message: 'The user already exist' });
+      }
 
       // hashing password
       const hashPassword = await bcrypt.hash(password, 10);
@@ -72,18 +61,15 @@ export class UserController {
           id: newUser._id,
           roles: newUser.roles,
         };
-        console.log("newuser : ", data);
+        console.log('newuser : ', data);
 
         return res.status(201).send({
-          status: "Success",
-          message: `Création  d'un nouvel utilisateur avec succès`,
+          status: 'Success',
+          message: 'Création  d\'un nouvel utilisateur avec succès',
           data,
         });
-      } else {
-        return res
-          .status(400)
-          .json({ message: "Invalid user data received !", data: newUser });
       }
+      return res.status(400).json({ message: 'Invalid user data received !', data: newUser });
     } catch (error) {
       // Vérifiez si l'erreur est une erreur de validation de Mongoose
       if (error instanceof Error.ValidationError) {
@@ -91,22 +77,18 @@ export class UserController {
 
         // Itérer sur les erreurs de validation et les stocker dans un objet
         Object.keys(error.errors).forEach((key) => {
-          validationErrors[key] = (error as Error.ValidationError).errors[
-            key
-          ].message;
+          validationErrors[key] = (error as Error.ValidationError).errors[key].message;
         });
 
         res.status(400).json({ errors: validationErrors });
       } else if (error instanceof MyCustomError) {
-        return res
-          .status(500)
-          .json({ status: "error", message: error.message });
+        return res.status(500).json({ status: 'error', message: error.message });
       } else {
-        console.log("error : ", error);
+        console.log('error : ', error);
         // Si ce n'est pas une erreur de validation, renvoyez une réponse d'erreur générique
         return res.status(500).json({
-          status: "error",
-          message: "Erreur lors de la création de l'utilisateur.",
+          status: 'error',
+          message: 'Erreur lors de la création de l\'utilisateur.',
         });
       }
     }
@@ -124,22 +106,17 @@ export class UserController {
     try {
       const { roles, userId } = req.body;
 
-      if (!roles || !roles.length)
-        return res
-          .status(400)
-          .json({ status: "error", message: "bad credentails !" });
-      console.log("user: ", userId);
+      if (!roles || !roles.length) return res.status(400).json({ status: 'error', message: 'bad credentails !' });
+      console.log('user: ', userId);
       if (!mongoose.isValidObjectId(userId)) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Invalid user ID." });
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
       }
 
       const user = await User.findById(userId);
 
       if (!user) {
         return res.status(404).json({
-          status: "error",
+          status: 'error',
           message: `User with ${userId} not found !`,
         });
       }
@@ -148,16 +125,15 @@ export class UserController {
       const update = await user.save();
       if (update) {
         return res.status(200).json({
-          status: "success",
+          status: 'success',
           data: update,
-          message: "successfully changed user role  ",
-        });
-      } else {
-        return res.status(404).json({
-          status: "error",
-          message: `Something went wrong !`,
+          message: 'successfully changed user role  ',
         });
       }
+      return res.status(404).json({
+        status: 'error',
+        message: 'Something went wrong !',
+      });
     } catch (error) {
       // Vérifiez si l'erreur est une erreur de validation de Mongoose
       if (error instanceof Error.ValidationError) {
@@ -165,22 +141,18 @@ export class UserController {
 
         // Itérer sur les erreurs de validation et les stocker dans un objet
         Object.keys(error.errors).forEach((key) => {
-          validationErrors[key] = (error as Error.ValidationError).errors[
-            key
-          ].message;
+          validationErrors[key] = (error as Error.ValidationError).errors[key].message;
         });
 
         res.status(400).json({ errors: validationErrors });
       } else if (error instanceof MyCustomError) {
-        return res
-          .status(500)
-          .json({ status: "error", message: error.message });
+        return res.status(500).json({ status: 'error', message: error.message });
       } else {
-        console.log("error : ", error);
+        console.log('error : ', error);
         // Si ce n'est pas une erreur de validation, renvoyez une réponse d'erreur générique
         return res.status(500).json({
-          status: "error",
-          message: "Erreur lors de la création de l'utilisateur.",
+          status: 'error',
+          message: 'Erreur lors de la création de l\'utilisateur.',
         });
       }
     }
@@ -196,19 +168,14 @@ export class UserController {
    */
   static async getAllUsers(req: Request, res: Response) {
     try {
-      console.log("session : ", req.session, req.sessionID);
-      const users = await User.find({}).select("-password").lean().exec();
-      if (!users.length)
-        return res
-          .status(404)
-          .json({ status: "error", message: "No users found !" });
+      console.log('session : ', req.session, req.sessionID);
+      const users = await User.find({}).select('-password').lean().exec();
+      if (!users.length) return res.status(404).json({ status: 'error', message: 'No users found !' });
 
-      return res.json({ status: "success", data: users });
+      return res.json({ status: 'success', data: users });
     } catch (error) {
-      console.log("error : ", error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Somethinfg went wrong !" });
+      console.log('error : ', error);
+      return res.status(500).json({ status: 'error', message: 'Somethinfg went wrong !' });
     }
   }
 
@@ -225,26 +192,16 @@ export class UserController {
       const { userId } = req.params;
 
       if (!mongoose.isValidObjectId(userId)) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Invalid user ID." });
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
       }
-      const users = await User.findById(userId)
-        .select("-password")
-        .lean()
-        .exec();
+      const users = await User.findById(userId).select('-password').lean().exec();
 
-      if (!users)
-        return res
-          .status(404)
-          .json({ status: "error", message: "No users found !" });
+      if (!users) return res.status(404).json({ status: 'error', message: 'No users found !' });
 
-      return res.json({ status: "success", data: users });
+      return res.json({ status: 'success', data: users });
     } catch (error) {
-      console.log("error : ", error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Somethinfg went wrong !" });
+      console.log('error : ', error);
+      return res.status(500).json({ status: 'error', message: 'Somethinfg went wrong !' });
     }
   }
 
@@ -261,23 +218,17 @@ export class UserController {
       const { userId } = req.body;
 
       if (!mongoose.isValidObjectId(userId)) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Invalid user ID." });
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
       }
       const users = await User.findById(userId);
 
-      if (!users)
-        return res
-          .status(404)
-          .json({ status: "error", message: "No users found !" });
-      await users.delete();
-      return res.json({ status: "success", message: "Successfully Deleted !" });
+      if (!users) return res.status(404).json({ status: 'error', message: 'No users found !' });
+      // TODO
+      await users.deleteOne();
+      return res.json({ status: 'success', message: 'Successfully Deleted !' });
     } catch (error) {
-      console.log("error : ", error);
-      return res
-        .status(500)
-        .json({ status: "error", message: "Somethinfg went wrong !" });
+      console.log('error : ', error);
+      return res.status(500).json({ status: 'error', message: 'Somethinfg went wrong !' });
     }
   }
 
@@ -292,20 +243,17 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const { userId } = req.params;
-      const { last_name, country_code, first_name, phone_number } = req.body;
+      const {
+        last_name, country_code, first_name, phone_number,
+      } = req.body;
 
       if (!mongoose.isValidObjectId(userId)) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Invalid user ID." });
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
       }
       // chek for user
       const user = await User.findById(userId);
 
-      if (!user)
-        return res
-          .status(404)
-          .json({ status: "error", message: "No users found !" });
+      if (!user) return res.status(404).json({ status: 'error', message: 'No users found !' });
 
       last_name && (user.last_name = last_name);
       phone_number && (user.phone_number = phone_number);
@@ -313,18 +261,15 @@ export class UserController {
       country_code && (user.country_code = country_code);
 
       const ipdateuser = await user.save();
-      console.log("updated : ", ipdateuser);
+      console.log('updated : ', ipdateuser);
       if (ipdateuser) {
         return res.json({
-          status: "Success",
-          message: `Successfully updated !`,
+          status: 'Success',
+          message: 'Successfully updated !',
           data: ipdateuser,
         });
-      } else {
-        return res
-          .status(400)
-          .json({ message: "Invalid user data received", data: user });
       }
+      return res.status(400).json({ message: 'Invalid user data received', data: user });
     } catch (error) {
       // Vérifiez si l'erreur est une erreur de validation de Mongoose
       if (error instanceof Error.ValidationError) {
@@ -332,22 +277,18 @@ export class UserController {
 
         // Itérer sur les erreurs de validation et les stocker dans un objet
         Object.keys(error.errors).forEach((key) => {
-          validationErrors[key] = (error as Error.ValidationError).errors[
-            key
-          ].message;
+          validationErrors[key] = (error as Error.ValidationError).errors[key].message;
         });
 
         res.status(400).json({ errors: validationErrors });
       } else if (error instanceof MyCustomError) {
-        return res
-          .status(500)
-          .json({ status: "error", message: error.message });
+        return res.status(500).json({ status: 'error', message: error.message });
       } else {
-        console.log("error : ", error);
+        console.log('error : ', error);
         // Si ce n'est pas une erreur de validation, renvoyez une réponse d'erreur générique
         return res.status(500).json({
-          status: "error",
-          message: "Erreur lors de la création de l'utilisateur.",
+          status: 'error',
+          message: 'Erreur lors de la création de l\'utilisateur.',
         });
       }
     }
