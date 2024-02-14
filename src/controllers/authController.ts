@@ -1,8 +1,11 @@
+/* eslint-disable consistent-return */
 import { Request, Response } from 'express';
+import { config } from 'dotenv';
 import bcrypt from 'bcrypt';
 
 import User, { UserTypes } from '../models/userModel.js';
 
+config();
 export class AuthenticationController {
   /**
    * @desc auhenticate a user with email and password
@@ -28,6 +31,7 @@ export class AuthenticationController {
 
       // check if the password match
       const matchPassword = await bcrypt.compare(password, checkUser.password!);
+      console.log('findUser', matchPassword, checkUser, password);
 
       // the password doesn't match
       if (!matchPassword) {
@@ -50,17 +54,28 @@ export class AuthenticationController {
 
   static async getUserStatus(req: Request, res: Response) {
     try {
-      const { user, userId } = req.session;
-      if (!user || !userId) {
+      const { user: userSession, userId } = req.session;
+      const { user } = req;
+
+      if (req.isAuthenticated()) {
+        return res.json({
+          status: 'success',
+          message: 'Logged in',
+          data: user,
+        });
+      }
+      if (!userId && !userSession) {
         return res.status(403).json({ message: 'Not logged in', status: 'error' });
       }
+      console.log('google : ', user, userSession, userId);
 
-      delete (user as UserTypes).password;
+      delete (userSession as UserTypes).password;
+      console.log('google.user : ', userSession);
 
       return res.json({
         status: 'success',
         message: 'Logged in',
-        data: user,
+        data: userSession,
       });
     } catch (err) {
       console.log('error', err);
@@ -77,8 +92,12 @@ export class AuthenticationController {
    * @returns
    */
   static async logout(req: Request, res: Response) {
-    req.session.destroy(() => {
-      res.json({ message: 'Logged out successfully', status: 'success' });
+    req.session.destroy(() => res.json({ message: 'Logged out successfully', status: 'success' }));
+    // passport
+    req.logout({}, (err) => {
+      if (err) return res.status(500).json({ message: 'Something went wrong!', status: 'success' });
     });
+
+    res.redirect(process.env.CLIENT_URL);
   }
 }

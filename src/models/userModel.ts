@@ -1,11 +1,14 @@
 import mongoose, { InferSchemaType } from 'mongoose';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 
-import {
-  EMAIL_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles,
-} from '../constants.js';
+// eslint-disable-next-line object-curly-newline
+import { EMAIL_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles } from '../constants.js';
 import { AfricanCountryCode } from '../utils/CountryCode.js';
 import { MyCustomError } from '../utils/CustomError.js';
+
+import Product from './productsModel.js';
+import Offer from './offerModel.js';
+import Group from './groupe.model.js';
 
 const UserSchema = new mongoose.Schema({
   first_name: {
@@ -19,12 +22,12 @@ const UserSchema = new mongoose.Schema({
   country_code: {
     type: String,
     enum: AfricanCountryCode,
-    required: true,
+    required: false,
   },
   created_at: { type: Date, default: Date.now },
   phone_number: {
     type: String,
-    required: true,
+    required: false,
   },
   email: {
     type: String,
@@ -37,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    require: true,
+    require: false,
   },
   last_name: {
     type: String,
@@ -54,6 +57,16 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: [userRoles.is_user],
   },
+  googleId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  picture: {
+    type: String,
+    required: false,
+    default: null,
+  },
 });
 
 // mongoose methods
@@ -65,9 +78,24 @@ UserSchema.pre('save', async function (next) {
   const phoneNumber = this.phone_number;
   const countryCode = this.country_code as AfricanCountryCode;
   console.log('first phone number : ', phoneNumber, countryCode);
-  if (!isValidPhoneNumber(phoneNumber, countryCode)) {
+
+  if (this.phone_number && !isValidPhoneNumber(phoneNumber, countryCode)) {
     throw new MyCustomError('Invalid phone number');
   }
+
+  next();
+});
+
+UserSchema.pre('deleteOne', { document: true }, async function (next) {
+  const userId = this._id;
+
+  // Mettez à jour les références dans d'autres collections
+  // Exemple : Mettre à null le champ `created_by` dans le schéma Products
+  await Product.updateMany({ created_by: userId }, { $set: { created_by: null } });
+  await Offer.updateMany({ author_id: userId }, { $set: { author_id: null } });
+  await Group.updateMany({ author_id: userId }, { $set: { author_id: null } });
+
+  // Ajoutez des étapes similaires pour d'autres références dans d'autres collections
 
   next();
 });

@@ -1,0 +1,31 @@
+{
+  "id": "114132803652903676182",
+  "displayName": "Ivan Silatsa",
+  "name": {
+    "familyName": "Silatsa",
+    "givenName": "Ivan"
+  },
+  "emails": [
+    {
+      "value": "ivansilatsa@gmail.com",
+      "verified": true
+    }
+  ],
+  "photos": [
+    {
+      "value": "https://lh3.googleusercontent.com/a/ACg8ocI4J688OvYdfKu2DbwS9w188y6yMup7LLUlQxl7Egsd=s96-c"
+    }
+  ],
+  "provider": "google",
+  "_raw": "{\n  \"sub\": \"114132803652903676182\",\n  \"name\": \"Ivan Silatsa\",\n  \"given_name\": \"Ivan\",\n  \"family_name\": \"Silatsa\",\n  \"picture\": \"https://lh3.googleusercontent.com/a/ACg8ocI4J688OvYdfKu2DbwS9w188y6yMup7LLUlQxl7Egsd\\u003ds96-c\",\n  \"email\": \"ivansilatsa@gmail.com\",\n  \"email_verified\": true,\n  \"locale\": \"fr\"\n}",
+  "_json": {
+    "sub": "114132803652903676182",
+    "name": "Ivan Silatsa",
+    "given_name": "Ivan",
+    "family_name": "Silatsa",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocI4J688OvYdfKu2DbwS9w188y6yMup7LLUlQxl7Egsd=s96-c",
+    "email": "ivansilatsa@gmail.com",
+    "email_verified": true,
+    "locale": "fr"
+  }
+}

@@ -1,15 +1,15 @@
 /* eslint-disable import/order */
 import { AdminJSOptions } from 'adminjs';
-
-import User from '../models/userModel.js';
 import componentLoader from './component-loader.js';
 import Product from '../models/productsModel.js';
 import Offer from '../models/offerModel.js';
+import { userResource } from '../utils/userResources.js';
+import Group from '../models/groupe.model.js';
 
 const options: AdminJSOptions = {
   componentLoader,
   rootPath: '/admin',
-  resources: [User, Product, Offer],
+  resources: [userResource, Product, Offer, Group],
   databases: [],
 };
 

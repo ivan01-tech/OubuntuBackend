@@ -1,6 +1,8 @@
+/* eslint-disable comma-dangle */
 /* eslint-disable no-console */
 import { join } from 'path';
 
+import passport from 'passport';
 import expresssession from 'express-session';
 import express from 'express';
 import AdminJS from 'adminjs';
@@ -23,6 +25,8 @@ import authRoute from './routes/authRoute.js';
 import rootRouter from './routes/root.js';
 import { corsOptions } from './config/corsCongif.js';
 import { logger } from './middleware/logger.js';
+import groupsRoute from './routes/group.route.js';
+import { configurePassport } from './config/passport.js';
 
 dotenv.config();
 
@@ -35,9 +39,13 @@ const app = express();
 AdminJS.registerAdapter({ Database, Resource });
 
 const start = async () => {
-  await initializeDb();
+  const mongoDB = await initializeDb();
 
-  const admin = new AdminJS(options);
+  const admin = new AdminJS({
+    ...options,
+
+    databases: [mongoDB.db],
+  });
 
   if (process.env.NODE_ENV === 'production') {
     await admin.initialize();
@@ -57,10 +65,11 @@ const start = async () => {
       secret: process.env.COOKIE_SECRET,
       saveUninitialized: true,
       resave: true,
-    },
+    }
   );
 
   app.use(admin.options.rootPath, router);
+  configurePassport();
 
   // deleteAllDocuments(User);
   // logger middleware
@@ -86,7 +95,8 @@ const start = async () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(sessionMiddleware);
-
+  app.use(passport.initialize());
+  app.use(passport.session());
   // static files
   app.use('/', express.static(join(process.cwd(), 'src', 'public')));
 
@@ -99,10 +109,9 @@ const start = async () => {
   // users Route
   app.use('/api/users', usersRoute);
 
-  // Secure routes
-  // Make sure that only get routes are not protected
   app.use('/api/products', productsRoute);
   app.use('/api/offers', offersRoute);
+  app.use('/api/groups', groupsRoute);
 
   // Catch-all routes
   app.all('/*', (req, res) => {
