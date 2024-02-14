@@ -2,7 +2,7 @@ import mongoose, { InferSchemaType } from 'mongoose';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 
 // eslint-disable-next-line object-curly-newline
-import { EMAIL_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles } from '../constants.js';
+import { EMAIL_REGEX, PASSWORD_REGEX, PHONE_NUMBER_REGEX, USER_ROLES, UserRoles, userRoles } from '../constants.js';
 import { AfricanCountryCode } from '../utils/CountryCode.js';
 import { MyCustomError } from '../utils/CustomError.js';
 
@@ -27,6 +27,7 @@ const UserSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
   phone_number: {
     type: String,
+    unique: true,
     required: false,
   },
   email: {
@@ -35,12 +36,16 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (v: string) => EMAIL_REGEX.test(v),
-      message: (props: any) => `${props.value} n'est pas un email valide!`,
+      message: (props) => `${props.value} n'est pas un email valide!`,
     },
   },
   password: {
     type: String,
-    require: false,
+    require: true,
+    // validate: {
+    //   validator: (v: string) => PASSWORD_REGEX.test(v),
+    //   message: (props) => 'Minimum eight characters, at least one letter, one number and one special character:',
+    // },
   },
   last_name: {
     type: String,
@@ -50,12 +55,15 @@ const UserSchema = new mongoose.Schema({
       message: 'Le prénom doit avoir entre 4 et 15 caractères.',
     },
   },
-
   roles: {
-    type: [String],
-    enum: USER_ROLES,
+    type: [
+      {
+        type: String,
+        enum: UserRoles,
+      },
+    ],
     required: true,
-    default: [userRoles.is_user],
+    default: [UserRoles.is_user],
   },
   googleId: {
     type: String,

@@ -7,6 +7,7 @@ import mongoose, { Error } from 'mongoose';
 
 import User from '../models/userModel.js';
 import { MyCustomError } from '../utils/CustomError.js';
+import { SALT_HASH } from '../constants.js';
 
 export class UserController {
   /**
@@ -41,7 +42,7 @@ export class UserController {
       }
 
       // hashing password
-      const hashPassword = await bcrypt.hash(password, 10);
+      const hashPassword = await bcrypt.hash(password, SALT_HASH);
 
       const newUser = await User.create({
         email,

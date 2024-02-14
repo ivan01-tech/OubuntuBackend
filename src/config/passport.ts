@@ -2,8 +2,10 @@
 /* eslint-disable comma-dangle */
 import { Strategy } from 'passport-google-oauth20';
 import passport from 'passport';
+import bcrypt from 'bcrypt';
 import { config } from 'dotenv';
 
+import { SALT_HASH } from '../constants.js';
 import User from '../models/userModel.js';
 
 config();
@@ -22,15 +24,18 @@ export function configurePassport() {
       (accessToken, refreshToken, profile, verification) => {
         console.log('profile : ', profile, refreshToken, verification, accessToken);
         const userJson = profile._json;
-        User.findOne({ $and: [{ email: userJson.email }, { googleId: userJson.sub }] })
-          .then((existingUser) => {
+        User.findOne({ $or: [{ email: userJson.email }, { googleId: userJson.sub }] })
+          .then(async (existingUser) => {
             if (existingUser) {
               // Handle existing user login (e.g., create session, redirect)
               console.log('User already exists:', existingUser.email);
               verification(null, existingUser); // Or handle differently based on your strategy
             } else {
+              const hashedPassword = await bcrypt.hash(process.env.DEFAULT_PASSWORD, SALT_HASH);
+
               const newUser = new User({
                 email: userJson.email,
+                password: hashedPassword,
                 first_name: userJson.family_name,
                 googleId: userJson.sub,
                 last_name: userJson.given_name,

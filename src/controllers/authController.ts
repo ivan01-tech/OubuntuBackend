@@ -30,7 +30,7 @@ export class AuthenticationController {
       }
 
       // check if the password match
-      const matchPassword = await bcrypt.compare(password, checkUser.password!);
+      const matchPassword = await bcrypt.compare(password, checkUser.password);
       console.log('findUser', matchPassword, checkUser, password);
 
       // the password doesn't match

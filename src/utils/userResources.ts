@@ -1,23 +1,43 @@
 /* eslint-disable no-param-reassign */
 import bcrypt from 'bcrypt';
 import { ListActionResponse, RecordActionResponse, ResourceWithOptions } from 'adminjs';
+import passwordsFeature from '@adminjs/passwords';
 
 import User from '../models/userModel.js';
+import componentLoader from '../admin/component-loader.js';
+import { SALT_HASH } from '../constants.js';
 
 export const userResource: ResourceWithOptions = {
   resource: User,
+  features: [
+    passwordsFeature({
+      properties: { encryptedPassword: 'password' },
+      hash: async (pass) => {
+        const res = await bcrypt.hash(pass, SALT_HASH);
+        const matchPassword = await bcrypt.compare(pass, res);
+        console.log('matchPassword : ', matchPassword);
+        return res;
+      },
+      componentLoader,
+    }),
+  ],
   options: {
     actions: {
       new: {
         before: async (request) => {
           const { password } = request.payload;
-          console.log('password : ', password);
+          console.log('request to', request.payload);
 
-          if (request.payload?.password) {
-            const hashPassword = await bcrypt.hash(password, 10);
+          return request;
+        },
+        after: async (request) => {
+          console.log('request to', request.payload);
+          // if (password) {
+          //   const saltRounds = 10; // Adjust salt rounds as needed
+          //   const hashedPassword = await bcrypt.hash(password, saltRounds);
+          //   request.payload.password = hashedPassword;
+          // }
 
-            request.payload.password = hashPassword;
-          }
           return request;
         },
       },
@@ -45,10 +65,7 @@ export const userResource: ResourceWithOptions = {
           }
           return request;
         },
-        after: async (response: RecordActionResponse) => {
-          response.record.params.password = '';
-          return response;
-        },
+        after: async (response: RecordActionResponse) => response,
       },
       list: {
         after: async (response: ListActionResponse) => {
@@ -65,8 +82,9 @@ export const userResource: ResourceWithOptions = {
           list: true,
           filter: true,
           show: true,
-          edit: true, // we only show it in the edit view
+          edit: true,
         },
+        type: 'string',
       },
     },
   },
