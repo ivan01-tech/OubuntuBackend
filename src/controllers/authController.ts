@@ -56,6 +56,7 @@ export class AuthenticationController {
     try {
       const { user: userSession, userId } = req.session;
       const { user } = req;
+      console.log('user : ', user);
 
       if (req.isAuthenticated()) {
         return res.json({
@@ -64,13 +65,12 @@ export class AuthenticationController {
           data: user,
         });
       }
+      console.log('user service : ', userId, userSession);
       if (!userId && !userSession) {
         return res.status(403).json({ message: 'Not logged in', status: 'error' });
       }
-      console.log('google : ', user, userSession, userId);
 
       delete (userSession as UserTypes).password;
-      console.log('google.user : ', userSession);
 
       return res.json({
         status: 'success',

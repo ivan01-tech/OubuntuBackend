@@ -6,18 +6,18 @@ import { config } from 'dotenv';
 
 import User from '../models/userModel.js';
 
-export function configurePassport() {
-  config();
-  const clientID = process.env.CLIENT_ID as string;
-  const clientSecret = process.env.CLIENT_SECRET as string;
+config();
+const clientID = process.env.CLIENT_ID as string;
+const clientSecret = process.env.CLIENT_SECRET as string;
 
+export function configurePassport() {
   passport.use(
     new Strategy(
       {
         clientID,
         clientSecret,
         callbackURL: '/api/auth/google/callback',
-        scope: ['profile', 'email', 'https://www.googleapis.com/auth/user.phonenumbers.read'], // Ajouter la portée pour accéder au numéro de téléphone
+        scope: ['profile', 'email'], // Ajouter la portée pour accéder au numéro de téléphone
       },
       (accessToken, refreshToken, profile, verification) => {
         console.log('profile : ', profile, refreshToken, verification, accessToken);
@@ -56,18 +56,20 @@ export function configurePassport() {
       }
     )
   );
-
-  passport.serializeUser((user, done) => {
-    console.log('serialized user : ', user);
-    done(null, { userId: user._id, user });
-  });
-
-  passport.deserializeUser((serializedData, done) => {
-    console.log('deserialized user : ', serializedData);
-
-    const { userId, user } = serializedData;
-    User.findById(userId, (err, foundUser) => {
-      done(err, foundUser || user);
-    });
-  });
 }
+passport.serializeUser((user, done) => {
+  console.log('serialized user : ', user);
+  done(null, user._id);
+});
+
+passport.deserializeUser((serializedData, done) => {
+  console.log('deserialized user : ', serializedData);
+
+  User.findById(serializedData)
+    .then((foundUser) => {
+      done(null, foundUser);
+    })
+    .catch((error) => {
+      done(error);
+    });
+});
