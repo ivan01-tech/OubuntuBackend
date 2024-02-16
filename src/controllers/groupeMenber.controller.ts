@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { isValidId } from '../utils/mongoose.js';
 import GroupeMember from '../models/groupMenber.entity.js';
+import ProductQuantityGroupe from '../models/productQuantityGroupeModel.entity.js';
 
 class GroupeMemberController {
   // Méthode pour récupérer tous les membres de groupe
@@ -72,6 +73,10 @@ class GroupeMemberController {
     if (!deletedMember) {
       return res.status(404).json({ status: 'error', message: 'Member not found' });
     }
+    
+    const userProductQ = await ProductQuantityGroupe.findOneAndDelete({
+      $and: [{ group_id: groupId }, { user_id: memberId }],
+    });
 
     return res.json({ status: 'success', data: deletedMember });
   }

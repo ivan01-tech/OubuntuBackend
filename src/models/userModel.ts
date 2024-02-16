@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 import mongoose, { InferSchemaType } from 'mongoose';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 
@@ -115,5 +116,5 @@ UserSchema.methods.toJSON = function () {
 };
 
 export type UserTypes = InferSchemaType<typeof UserSchema>;
-const User = mongoose.model<UserTypes>('User', UserSchema);
+const User = mongoose.models.User || mongoose.model<UserTypes>('User', UserSchema);
 export default User;

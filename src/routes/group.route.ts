@@ -1,8 +1,10 @@
+/* eslint-disable comma-dangle */
 import express from 'express';
 
 import { requireAuth } from '../middleware/requiredAuth.js';
 import { GroupController } from '../controllers/group.middleware.js';
 import GroupeMemberController from '../controllers/groupeMenber.controller.js';
+import { ProductQuantityGroupeController } from '../controllers/productQuantityGroupeSchema.controller.js';
 
 const groupsRoute = express.Router();
 
@@ -20,8 +22,19 @@ groupsRoute
   // Route pour récupérer tous les membres du groupe
   .get('/:groupId/groupMenbers', GroupeMemberController.getAllMembersByGroupId)
   .post('/:groupId/groupMenbers', requireAuth, GroupeMemberController.addMember)
-
   // Route pour supprimer un membre du groupe
-  .delete('/:groupId/groupMenbers/:memberId', requireAuth, GroupeMemberController.removeMember);
+  .delete('/:groupId/groupMenbers/:memberId', requireAuth, GroupeMemberController.removeMember)
+
+  // gestion des quantites
+  .get(
+    '/:groupId/productQuantities',
+    requireAuth,
+    ProductQuantityGroupeController.getAllProductQuantityGroupesByGroupId
+  )
+  .patch(
+    '/:groupId/productQuantities',
+    requireAuth,
+    ProductQuantityGroupeController.updateProductQuantityGroupeByUserId
+  );
 
 export default groupsRoute;

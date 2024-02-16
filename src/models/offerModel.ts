@@ -15,7 +15,7 @@ const OfferSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
 });
 
-const Offer = mongoose.model('Offer', OfferSchema);
+const Offer = mongoose.models.Offer || mongoose.model('Offer', OfferSchema);
 
 export type OfferType = InferSchemaType<typeof OfferSchema>;
 export default Offer;

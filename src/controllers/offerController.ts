@@ -13,7 +13,7 @@ export default class OfferController {
     let author_id: string;
 
     if (req.isAuthenticated()) {
-      author_id = req.user.id;
+      author_id = req.user._id;
     } else {
       author_id = req.session.userId;
     }

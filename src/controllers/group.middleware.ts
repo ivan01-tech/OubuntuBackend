@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 import { isValidId } from '../utils/mongoose.js';
 import Group from '../models/groupe.model.js';
 import Offer from '../models/offerModel.js';
+import ProductQuantityGroupe from '../models/productQuantityGroupeModel.entity.js';
+import GroupeMember from '../models/groupMenber.entity.js';
 
 export class GroupController {
   /**
@@ -22,7 +24,7 @@ export class GroupController {
     let author_id: string;
 
     if (req.isAuthenticated()) {
-      author_id = req.user.id;
+      author_id = req.user._id;
     } else {
       author_id = req.session.userId;
     }
@@ -70,7 +72,7 @@ export class GroupController {
     let author_id: string;
 
     if (req.isAuthenticated()) {
-      author_id = req.user.id;
+      author_id = req.user._id;
     } else {
       author_id = req.session.userId;
     }
@@ -107,21 +109,31 @@ export class GroupController {
    */
   static async deleteGroup(req: Request, res: Response) {
     const { groupId } = req.params;
-
+    // Vérifie si l'id est un ObjectId valide
     if (!mongoose.isValidObjectId(groupId)) {
-      return res.status(400).json({ status: 'error', message: 'Invalid group ID.' });
+      return res.status(400).json({ status: 'error', message: 'Invalid ObjectId format.' });
     }
 
-    const deletedGroup = await Group.findByIdAndDelete(groupId);
+    // Récupère un groupe par ID
+    const group = await Group.findById(groupId);
 
-    if (!deletedGroup) {
+    // Vérifie si le groupe existe
+    if (!group) {
       return res.status(404).json({ status: 'error', message: 'Group not found.' });
     }
 
+    // Supprime le groupe
+    await group.deleteOne();
+
+    // Supprime tous les ProductQuantityGroupe associés à ce groupe
+    await ProductQuantityGroupe.deleteMany({ group_id: group._id });
+
+    // Supprime tous les GroupeMember associés à ce groupe
+    await GroupeMember.deleteMany({ group_id: group._id });
+
     return res.status(200).json({
-      status: 'Success',
-      message: 'Group Successfully Deleted!',
-      data: deletedGroup,
+      status: 'success',
+      message: 'Group and associated records deleted successfully.',
     });
   }
 
@@ -206,10 +218,6 @@ export class GroupController {
         message: `Group with ${groupId} id not found !`,
       });
     }
-    const userIdString = req.session.userId;
-
-    const userIdObjectId = new mongoose.Types.ObjectId(userIdString);
-    offer.users = [...offer.users, userIdObjectId];
 
     // Vérification de la validité du groupe en fonction de expired_at
     const now = Date.now();
@@ -238,30 +246,27 @@ export class GroupController {
    * @param res
    * @returns
    */
-  static async removeUser(req: Request, res: Response) {
-    const { groupId, userId } = req.params;
+  // static async removeUser(req: Request, res: Response) {
+  //   const { groupId, userId } = req.params;
 
-    if (!isValidId(groupId) || isValidId(userId)) {
-      return res.status(400).json({ status: 'error', message: 'Invalid group or user ID.' });
-    }
+  //   if (!isValidId(groupId) || isValidId(userId)) {
+  //     return res.status(400).json({ status: 'error', message: 'Invalid group or user ID.' });
+  //   }
 
-    const group = await Group.findById(groupId);
+  //   const group = await Group.findById(groupId);
 
-    if (!group) {
-      return res.status(404).json({ status: 'error', message: 'Group not found.' });
-    }
+  //   if (!group) {
+  //     return res.status(404).json({ status: 'error', message: 'Group not found.' });
+  //   }
 
-    const userIdObjectId = new mongoose.Types.ObjectId(userId);
+  //   const userIdObjectId = new mongoose.Types.ObjectId(userId);
 
-    // Supprimer l'utilisateur du tableau des utilisateurs du groupe
-    group.users = group.users.filter((user) => !user.equals(userIdObjectId));
+  //   const updatedGroup = await group.save();
 
-    const updatedGroup = await group.save();
-
-    return res.status(200).json({
-      status: 'Success',
-      message: 'User Successfully Removed from the Group!',
-      data: updatedGroup,
-    });
-  }
+  //   return res.status(200).json({
+  //     status: 'Success',
+  //     message: 'User Successfully Removed from the Group!',
+  //     data: updatedGroup,
+  //   });
+  // }
 }

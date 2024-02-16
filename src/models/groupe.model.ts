@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import mongoose, { InferSchemaType } from 'mongoose';
 
 import GroupeMember from './groupMenber.entity.js';
+import ProductQuantityGroupe from './productQuantityGroupeModel.entity.js';
 
 dotenv.config();
 
@@ -28,14 +29,22 @@ groupeSchema.pre('save', async function (next) {
     user_id: this.author_id,
   });
 
+  // Créer automatiquement un membre associé à ce groupe avec l'ID de l'auteur
+  const quantiy = new ProductQuantityGroupe({
+    group_id: this._id,
+    user_id: this.author_id,
+    quantiy: 0,
+  });
+
   try {
     await member.save();
+    await quantiy.save();
     next();
   } catch (error) {
     next(error);
   }
 });
-const Group = mongoose.model('Group', groupeSchema);
+const Group = mongoose.models.Group || mongoose.model('Group', groupeSchema);
 
 export type OfferType = InferSchemaType<typeof groupeSchema>;
 export default Group;

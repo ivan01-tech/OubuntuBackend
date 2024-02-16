@@ -33,5 +33,5 @@ groupeMemberSchema.pre('save', async function (next) {
 });
 
 export type UserTypes = InferSchemaType<typeof groupeMemberSchema>;
-const GroupeMember = mongoose.model<UserTypes>('GroupeMenber', groupeMemberSchema);
+const GroupeMember = mongoose.models.GroupeMember || mongoose.model<UserTypes>('GroupeMenber', groupeMemberSchema);
 export default GroupeMember;
