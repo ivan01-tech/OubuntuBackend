@@ -59,7 +59,7 @@ export default class ProductController {
         // Si ce n'est pas une erreur de validation, renvoyez une réponse d'erreur générique
         return res.status(500).json({
           status: 'error',
-          message: 'Erreur lors de la création de l\'utilisateur.',
+          message: "Erreur lors de la création de l'utilisateur.",
         });
       }
     }
@@ -95,22 +95,17 @@ export default class ProductController {
    * @returns
    */
   static async deleteProduct(req: Request, res: Response) {
-    try {
-      const { productId } = req.body;
+    const { productId } = req.params;
 
-      if (!mongoose.isValidObjectId(productId)) {
-        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
-      }
-
-      const product = await Product.findById(productId);
-
-      if (!product) return res.status(404).json({ status: 'error', message: 'No product found !' });
-      // TODO
-      const deleteP = await product.deleteOne();
-      return res.json({ status: 'success', message: 'Successfully Deleted !' });
-    } catch (error) {
-      console.log('error : ', error);
-      return res.status(500).json({ status: 'error', message: 'Somethinfg went wrong !' });
+    if (!mongoose.isValidObjectId(productId)) {
+      return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
     }
+
+    const product = await Product.findById(productId);
+
+    if (!product) return res.status(404).json({ status: 'error', message: 'No product found !' });
+    // TODO
+    const deleteP = await product.deleteOne();
+    return res.json({ status: 'success', message: 'Successfully Deleted !', data: deleteP });
   }
 }

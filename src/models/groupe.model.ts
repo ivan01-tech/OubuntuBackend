@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import mongoose, { InferSchemaType } from 'mongoose';
 
+import GroupeMember from './groupMenber.entity.js';
+
 dotenv.config();
 
 const groupeSchema = new mongoose.Schema({
@@ -9,19 +11,30 @@ const groupeSchema = new mongoose.Schema({
   author_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   link: { type: String },
   expired_at: { type: Date, default: Date.now() },
-  users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 });
-const OUBUNTU_BACKEND_URI = process.env.OUBUNTU_BACKEND_URI as string;
 
-// eslint-disable-next-line func-names
+const OUBUNTU_BACKEND_URI_GRP = `${process.env.OUBUNTU_BACKEND_URI as string}/groups`;
+
+// Middleware pour intercepter la sauvegarde du groupe
 groupeSchema.pre('save', async function (next) {
   if (!this.isModified('link')) {
-    const link = `${OUBUNTU_BACKEND_URI}/${this._id}/users`;
+    const link = `${OUBUNTU_BACKEND_URI_GRP}/${this._id}/groupMenbers`;
     this.link = link;
   }
-  next();
-});
 
+  // Créer automatiquement un membre associé à ce groupe avec l'ID de l'auteur
+  const member = new GroupeMember({
+    group_id: this._id,
+    user_id: this.author_id,
+  });
+
+  try {
+    await member.save();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 const Group = mongoose.model('Group', groupeSchema);
 
 export type OfferType = InferSchemaType<typeof groupeSchema>;

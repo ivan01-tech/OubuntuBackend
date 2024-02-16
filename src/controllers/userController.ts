@@ -236,10 +236,10 @@ export class UserController {
   /**
    * @desc upadate a  user
    * @route PATCH /users/:userId
-   * @access Prvate
+   * @access private
    * @param req
    * @param res
-   * @returns
+   * @returns json
    */
   static async updateUser(req: Request, res: Response) {
     try {

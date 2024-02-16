@@ -3,8 +3,8 @@
 
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { isValidId } from 'src/utils/mongoose.js';
 
+import { isValidId } from '../utils/mongoose.js';
 import Group from '../models/groupe.model.js';
 import Offer from '../models/offerModel.js';
 
@@ -19,9 +19,17 @@ export class GroupController {
    */
   static async createGroup(req: Request, res: Response) {
     const { offer_id } = req.body;
-    const author_id = req.session.userId;
+    let author_id: string;
 
-    if (!mongoose.isValidObjectId(offer_id)) {
+    if (req.isAuthenticated()) {
+      author_id = req.user.id;
+    } else {
+      author_id = req.session.userId;
+    }
+
+    console.log('author_id : ', author_id);
+
+    if (!isValidId(offer_id)) {
       return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
     }
 
@@ -34,7 +42,7 @@ export class GroupController {
       });
     }
 
-    const group = await Group.create({ offer_id, author_id, users: [author_id] });
+    const group = await Group.create({ offer_id, author_id });
 
     if (!group) {
       return res.status(400).json({ message: 'Invalid group data !' });
@@ -58,7 +66,14 @@ export class GroupController {
   static async updateGroup(req: Request, res: Response) {
     const { groupId } = req.params;
     const { offer_id } = req.body;
-    const author_id = req.session.userId;
+
+    let author_id: string;
+
+    if (req.isAuthenticated()) {
+      author_id = req.user.id;
+    } else {
+      author_id = req.session.userId;
+    }
 
     if (!isValidId(groupId) || !isValidId(offer_id)) {
       return res.status(400).json({ status: 'error', message: 'Invalid group or offer ID.' });
@@ -97,22 +112,17 @@ export class GroupController {
       return res.status(400).json({ status: 'error', message: 'Invalid group ID.' });
     }
 
-    try {
-      const deletedGroup = await Group.findByIdAndDelete(groupId);
+    const deletedGroup = await Group.findByIdAndDelete(groupId);
 
-      if (!deletedGroup) {
-        return res.status(404).json({ status: 'error', message: 'Group not found.' });
-      }
-
-      return res.status(200).json({
-        status: 'Success',
-        message: 'Group Successfully Deleted!',
-        data: deletedGroup,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    if (!deletedGroup) {
+      return res.status(404).json({ status: 'error', message: 'Group not found.' });
     }
+
+    return res.status(200).json({
+      status: 'Success',
+      message: 'Group Successfully Deleted!',
+      data: deletedGroup,
+    });
   }
 
   /**
@@ -149,6 +159,31 @@ export class GroupController {
   }
 
   /**
+   * @desc Récupère tous les groupes
+   * @route GET /groups/
+   * @access private
+   * @param req
+   * @param res
+   * @returns
+   */
+  static async getAllGroups(req: Request, res: Response) {
+    const group = await Group.find()
+
+      .populate([{ path: 'author_id', select: '-password' }, { path: 'offer_id' }])
+      .lean()
+      .exec();
+
+    if (!group.length) {
+      return res.status(404).json({ status: 'error', message: 'Groups not found.' });
+    }
+
+    return res.status(200).json({
+      status: 'Success',
+      data: group,
+    });
+  }
+
+  /**
    * @desc add new user to the group
    * @route GET /groups/:groupId/users
    * @access private
@@ -159,7 +194,7 @@ export class GroupController {
   static async addUser(req: Request, res: Response) {
     const { groupId } = req.params;
 
-    if (!mongoose.isValidObjectId(groupId)) {
+    if (isValidId(groupId)) {
       return res.status(400).json({ status: 'error', message: 'Invalid group ID.' });
     }
 

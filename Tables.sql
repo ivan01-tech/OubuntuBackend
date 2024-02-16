@@ -61,14 +61,14 @@ Table groupes  {
 
 Table groupe_members  {
   id int [pk, increment]
-  groupe_id int [ref: > groupes.id]
+  group_id int [ref: > groupes.id]
   user_id int [ref: - users.id]
   createdd_at datetime
 }
 
 Table product_quantity_groupe  {
   id int [pk, increment]
-  groupe_id int [ref: > groupes.id]
+  group_id int [ref: > groupes.id]
   user_id int [ref: - users.id]
   quantiy float 
   reserved_at datetime
@@ -76,7 +76,7 @@ Table product_quantity_groupe  {
 
 Table comptes  {
   id int [pk, ref: - groupes.id]
-  groupe_id int
+  group_id int
   is_ok boolean
   montant double
 }

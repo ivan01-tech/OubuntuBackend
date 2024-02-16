@@ -9,7 +9,14 @@ import Offer from '../models/offerModel.js';
 export default class OfferController {
   static async createOffer(req: Request, res: Response) {
     const { product_id, description } = req.body;
-    const author_id = req.session.userId;
+
+    let author_id: string;
+
+    if (req.isAuthenticated()) {
+      author_id = req.user.id;
+    } else {
+      author_id = req.session.userId;
+    }
 
     if (!description || !product_id) {
       return res.status(400).json({ status: 'error', message: 'All fields must be set' });
@@ -65,17 +72,17 @@ export default class OfferController {
    * @returns
    */
   static async deleteOffer(req: Request, res: Response) {
-    const { offerId } = req.body;
+    const { offerId } = req.params;
 
     if (!mongoose.isValidObjectId(offerId)) {
       return res.status(400).json({ status: 'error', message: 'Invalid offer ID.' });
     }
     const offer = await Offer.findById(offerId);
 
-    if (!offer) return res.status(404).json({ status: 'error', message: 'No users found !' });
+    if (!offer) return res.status(404).json({ status: 'error', message: 'No offers found !' });
     // TODO
-    await offer.deleteOne();
+    const p = await offer.deleteOne();
 
-    return res.json({ status: 'success', message: 'Successfully Deleted !' });
+    return res.json({ status: 'success', message: 'Successfully Deleted !', data: p });
   }
 }

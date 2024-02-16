@@ -8,7 +8,7 @@ const offersRoute = express.Router();
 
 offersRoute
   .post('/', requireAuth, requiredAdminRoles, OfferController.createOffer)
-  .delete('/', requireAuth, requiredAdminRoles, OfferController.deleteOffer)
+  .delete('/:offerId', requireAuth, requiredAdminRoles, OfferController.deleteOffer)
   .get('/', OfferController.getAllOffOffers);
 
 export default offersRoute;
