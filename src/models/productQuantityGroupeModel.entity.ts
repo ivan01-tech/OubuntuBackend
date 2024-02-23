@@ -4,7 +4,7 @@ import mongoose, { InferSchemaType } from 'mongoose';
 const productQuantityGroupeSchema = new mongoose.Schema({
   group_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  quantiy: { type: Number, default: 0, required: true },
+  quantity: { type: Number, default: 0 },
   reserved_at: {
     type: Date,
     default: Date.now(),

@@ -32,6 +32,11 @@ groupsRoute
     ProductQuantityGroupeController.getAllProductQuantityGroupesByGroupId
   )
   .patch(
+    '/:groupId/productQuantities/:productQuantityId',
+    requireAuth,
+    ProductQuantityGroupeController.updateProductQuantityGroupe
+  )
+  .patch(
     '/:groupId/productQuantities',
     requireAuth,
     ProductQuantityGroupeController.updateProductQuantityGroupeByUserId

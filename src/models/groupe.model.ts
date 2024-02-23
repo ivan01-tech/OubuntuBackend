@@ -8,7 +8,6 @@ dotenv.config();
 
 const groupeSchema = new mongoose.Schema({
   offer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer' },
-  quantiy_product: { type: Number, default: 0 },
   author_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   link: { type: String },
   expired_at: { type: Date, default: Date.now() },

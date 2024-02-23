@@ -2,7 +2,6 @@
 /* eslint-disable consistent-return */
 /* eslint-disable comma-dangle */
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 
 import ProductQuantityGroupe from '../models/productQuantityGroupeModel.entity.js';
 import { isValidId } from '../utils/mongoose.js';
@@ -40,7 +39,7 @@ export class ProductQuantityGroupeController {
     }
     // Récupère tous les objets ProductQuantityGroupe
     const productQuantityGroupes = await ProductQuantityGroupe.find({ group_id: groupId })
-      .populate([{ path: 'user_id', select: '-password' }])
+      .populate([{ path: 'user_id', select: '-password' }, { path: 'group_id' }])
       .lean()
       .exec();
 
@@ -84,7 +83,8 @@ export class ProductQuantityGroupeController {
    */
   static async updateProductQuantityGroupe(req: Request, res: Response) {
     // Vérifie si l'id est un ObjectId valide
-    if (!isValidId(req.params.id)) {
+    const { productQuantityId } = req.params;
+    if (!isValidId(productQuantityId)) {
       return res.status(400).json({ status: 'error', message: 'Invalid ObjectId format.' });
     }
 
@@ -94,8 +94,8 @@ export class ProductQuantityGroupeController {
     }
 
     // Récupère un objet ProductQuantityGroupe par ID
-    const productQuantityGroupe = await ProductQuantityGroupe.findById(req.params.id);
-
+    const productQuantityGroupe = await ProductQuantityGroupe.findById(productQuantityId);
+    console.log('first product quantity : ', productQuantityGroupe);
     // Vérifie si l'objet existe
     if (!productQuantityGroupe) {
       return res.status(404).json({ status: 'error', message: 'ProductQuantityGroupe not found.' });
@@ -103,10 +103,11 @@ export class ProductQuantityGroupeController {
 
     // Met à jour la quantité de l'objet ProductQuantityGroupe
     const updatedProductQuantityGroupe = await ProductQuantityGroupe.findByIdAndUpdate(
-      req.params.id,
+      productQuantityId,
       { quantity: req.body.quantity }, // Mettez à jour la propriété de quantité ici
       { new: true }
     );
+    console.log('updatedProductQuantityGroupe : ', updatedProductQuantityGroupe);
 
     return res.status(200).json({
       status: 'success',

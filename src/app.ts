@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable comma-dangle */
 /* eslint-disable no-console */
 import { join } from 'path';
@@ -27,6 +28,13 @@ import { corsOptions } from './config/corsCongif.js';
 import { logger } from './middleware/logger.js';
 import groupsRoute from './routes/group.route.js';
 import { configurePassport } from './config/passport.js';
+import { deleteAllDocuments } from './utils/deleteMany.js';
+import User from './models/userModel.js';
+import Product from './models/productsModel.js';
+import Offer from './models/offerModel.js';
+import Group from './models/groupe.model.js';
+import GroupeMember from './models/groupMenber.entity.js';
+import ProductQuantityGroupe from './models/productQuantityGroupeModel.entity.js';
 
 dotenv.config();
 
@@ -71,7 +79,7 @@ const start = async () => {
   app.use(admin.options.rootPath, router);
   configurePassport();
 
-  // deleteAllDocuments(User);
+  // deleteAllDocuments(ProductQuantityGroupe);
   // logger middleware
   app.use(logger);
 
