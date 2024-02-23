@@ -1,111 +1,117 @@
-import * as dotenv from "dotenv";
-import express from "express";
-import { join } from "node:path";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import rootRouter from "./routes/root.js";
-import { logEvent, logger } from "./middleware/logger.js";
-import errLogger from "./middleware/errLogger.js";
-import { corsOptions } from "./config/corsCongif.js";
-import mongoose from "mongoose";
-import dbConnection from "./config/dbConnection.js";
-import usersRoute from "./routes/userRoute.js";
-import session from "express-session";
-import authRoute from "./routes/authRoute.js";
-import { deleteAllDocuments } from "./utils/deleteMany.js";
-import User from "./models/userModel.js";
-import { requiredAdminRoles } from "./middleware/checkUserRoles.js";
-import { requireAuth } from "./middleware/requiredAuth.js";
-import productsRoute from "./routes/productRoute.js";
-import errorHandlerMiddleware from "./middleware/errorMiddleware.js";
-import offersRoute from "./routes/offersRoute.js";
-// env var
-dotenv.config({ path: join(process.cwd(), "src", ".env") });
+// // server.ts
 
-const PORT = process.env.PORT || 3500;
-const secretKey = process.env.EXPRESS_SESSION_KEY!;
+// import { join } from 'node:path';
 
-const app = express();
+// import express from 'express';
+// import cookieParser from 'cookie-parser';
+// import cors from 'cors';
+// import session from 'express-session';
+// import mongoose from 'mongoose';
+// import AdminJS from 'adminjs';
+// import AdminJSExpress from '@adminjs/express';
+// import * as dotenv from 'dotenv';
+// import { Database, Resource } from '@adminjs/mongoose';
 
-// connect to DB
-dbConnection();
-// deleteAllDocuments(User);
-// logger middleware
-app.use(logger);
+// import dbConnection from './config/dbConnection.js';
+// import rootRouter from './routes/root.js';
+// import errLogger from './middleware/errLogger.js';
+// import { corsOptions } from './config/corsCongif.js';
+// import { deleteAllDocuments } from './utils/deleteMany.js';
+// import { requiredAdminRoles } from './middleware/checkUserRoles.js';
+// import { requireAuth } from './middleware/requiredAuth.js';
+// import productsRoute from './routes/productRoute.js';
+// import errorHandlerMiddleware from './middleware/errorMiddleware.js';
+// import offersRoute from './routes/offersRoute.js';
+// import usersRoute from './routes/userRoute.js';
+// import { logger } from './middleware/logger.js';
+// import User from './models/userModel.js';
+// import Offer from './models/offerModel.js';
+// import Product from './models/productsModel.js';
+// import authRoute from './routes/authRoute.js';
 
-//cookie-parser to manage secure cookie , during the proccess of authentication and authorization
-app.use(cookieParser());
+// const PORT = process.env.PORT || 3500;
+// const secretKey = process.env.EXPRESS_SESSION_KEY!;
+// const app = express();
 
-// cors
-app.use(cors(corsOptions));
+// const startApp = async () => {
+//   // connect to DB
+//   // await dbConnection();
 
-// session authentication configuration
-const sessionMiddleware = session({
-  secret: secretKey,
-  resave: false, // Don't resave sessions if unmodified
-  saveUninitialized: false, // Don't create empty sessions
-  cookie: {
-    // TODO comme here before deployment
-    maxAge: 1000 * 60 * 2, // Session expires in 1 hour
-    secure: false, // Set to true for HTTPS only
-    httpOnly: false, // Only accessible via HTTP
-  },
-});
-// built in middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//   const admin = new AdminJS({ resources: [User, Offer, Product] });
+//   const adminRouter = AdminJSExpress.buildRouter(admin);
+//   app.use(admin.options.rootPath, adminRouter);
 
-// custom middleware
-app.use(sessionMiddleware);
+//   // deleteAllDocuments(User);
+//   // logger middleware
+//   app.use(logger);
 
-// static files
-app.use("/", express.static(join(process.cwd(), "src", "public")));
+//   // cookie-parser to manage secure cookie
+//   app.use(cookieParser());
 
-// root router
-app.use("/api", rootRouter);
+//   // cors
+//   app.use(cors(corsOptions));
 
-// auth routes
-app.use("/api/auth", authRoute);
+//   // session authentication configuration
+//   const sessionMiddleware = session({
+//     secret: secretKey,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       maxAge: 1000 * 60 * 2,
+//       secure: false,
+//       httpOnly: false,
+//     },
+//   });
+//   app.use(express.json());
+//   app.use(express.urlencoded({ extended: true }));
+//   app.use(sessionMiddleware);
 
-// users Route
-app.use("/api/users", usersRoute);
+//   // static files
+//   app.use('/', express.static(join(process.cwd(), 'src', 'public')));
 
-/**
- * Secure routes defined in here
- */
-// make sure that only  get routes are not protected
-// products Routes
-app.use("/api/products", productsRoute);
+//   // root router
+//   app.use('/api', rootRouter);
 
-// offers Routes
-app.use("/api/offers", offersRoute);
+//   // auth routes
+//   app.use('/api/auth', authRoute);
 
-// catch all routes
-app.all("/*", function (req, res) {
-  res.status(404);
+//   // users Route
+//   app.use('/api/users', usersRoute);
 
-  if (req.accepts("html")) {
-    // nothing
-  } else if (req.accepts("json")) {
-    res.json({ message: "Not Found !" });
-  } else {
-    res.type("text").send("Not Found");
-  }
-});
+//   // Secure routes
+//   // Make sure that only get routes are not protected
+//   app.use('/api/products', productsRoute);
+//   app.use('/api/offers', offersRoute);
 
-// listenner
-mongoose.connection.once("open", function () {
-  console.log("Connected to MongoDB");
-  app.listen(PORT, function () {
-    console.log("Server is running on  : ", `http://localhost:${PORT}`);
-  });
-});
+//   // Catch-all routes
+//   app.all('/*', (req, res) => {
+//     res.status(404);
 
-mongoose.connection.on("error", (err) => {
-  logEvent(`${err.no}: ${err.code} ${err.syscal}`, "mongoError.log");
-  console.log("error : ", err.message);
-});
+//     if (req.accepts('html')) {
+//       // nothing
+//     } else if (req.accepts('json')) {
+//       res.json({ message: 'Not Found !' });
+//     } else {
+//       res.type('text').send('Not Found');
+//     }
+//   });
 
-// custom error handler
-app.use(errLogger);
-app.use(errorHandlerMiddleware);
+//   // custom error handler
+//   app.use(errLogger);
+//   app.use(errorHandlerMiddleware);
+
+//   // listener
+//   mongoose.connection.once('open', () => {
+//     console.log('Connected to MongoDB');
+//     app.listen(PORT, () => {
+//       console.log('Server is running on : ', `http://localhost:${PORT}`);
+//       console.log(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`);
+//     });
+//   });
+
+//   mongoose.connection.on('error', (err) => {
+//     console.log(`MongoDB connection error: ${err.message}`);
+//   });
+// };
+// startApp();
+// export default startApp;
