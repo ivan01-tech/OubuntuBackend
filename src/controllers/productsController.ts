@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 import { Request, Response } from 'express';
 import mongoose, { Error } from 'mongoose';
 

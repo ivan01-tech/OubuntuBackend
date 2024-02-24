@@ -35,6 +35,7 @@ import Offer from './models/offerModel.js';
 import Group from './models/groupe.model.js';
 import GroupeMember from './models/groupMenber.entity.js';
 import ProductQuantityGroupe from './models/productQuantityGroupeModel.entity.js';
+import categoriesRoutes from './routes/categoriesRoutes.js';
 
 dotenv.config();
 
@@ -76,7 +77,7 @@ const start = async () => {
     }
   );
 
-  // app.use(admin.options.rootPath, router);
+  app.use(admin.options.rootPath, router);
   configurePassport();
 
   // deleteAllDocuments(ProductQuantityGroupe);
@@ -133,6 +134,7 @@ const start = async () => {
   app.use('/api/products', productsRoute);
   app.use('/api/offers', offersRoute);
   app.use('/api/groups', groupsRoute);
+  app.use('/api/categories', categoriesRoutes);
 
   // Catch-all routes
   app.all('/*', (req, res) => {
