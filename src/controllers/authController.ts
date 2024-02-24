@@ -16,71 +16,65 @@ export class AuthenticationController {
    * @returns
    */
   static async login(req: Request, res: Response) {
-    try {
-      const { email, password } = req.body;
+    const { email, password } = req.body;
 
-      if (!email || !password) {
-        return res.status(400).json({ status: 'error', message: 'All fields are required!' });
-      }
-
-      // check if the user exist
-      const checkUser = await User.findOne({ email }).lean().exec();
-      if (!checkUser) {
-        return res.status(401).json({ message: 'Unauthorized ! ', status: 'error' });
-      }
-
-      // check if the password match
-      const matchPassword = await bcrypt.compare(password, checkUser.password);
-      console.log('findUser', matchPassword, checkUser, password);
-
-      // the password doesn't match
-      if (!matchPassword) {
-        return res.status(401).json({ message: 'Unauthorized', status: 'error' });
-      }
-
-      req.session.user = checkUser;
-      req.session.userId = checkUser._id.toString();
-
-      console.log('here');
-      return res.json({
-        status: 'success',
-        message: 'successfully logged in',
-      });
-    } catch (err) {
-      console.log('error', err);
-      return res.status(500).json({ status: 'error', message: (err as Error).message });
+    if (!email || !password) {
+      return res.status(400).json({ status: 'error', message: 'All fields are required!' });
     }
+
+    // check if the user exist
+    const checkUser = await User.findOne({ email });
+    // console.log('checkUser', checkUser);
+    if (!checkUser) {
+      return res.status(401).json({ message: 'Unauthorized ! ', status: 'error' });
+    }
+
+    // check if the password match
+    const matchPassword = await bcrypt.compare(password, checkUser.password);
+    // console.log('findUser', matchPassword, checkUser, password);
+
+    // the password doesn't match
+    if (!matchPassword) {
+      return res.status(401).json({ message: 'Unauthorized', status: 'error' });
+    }
+
+    req.session.user = checkUser;
+    req.session.userId = checkUser._id.toString();
+
+    delete checkUser.password;
+    console.log('user : ', req.session.id);
+
+    return res.json({
+      status: 'success',
+      data: checkUser,
+      message: 'successfully logged in',
+    });
   }
 
   static async getUserStatus(req: Request, res: Response) {
-    try {
-      const { user: userSession, userId } = req.session;
-      const { user } = req;
-      console.log('user : ', user);
+    const { user: userSession, userId } = req.session;
+    const { user } = req;
+    console.log('user : ', req.session.cookie);
 
-      if (req.isAuthenticated()) {
-        return res.json({
-          status: 'success',
-          message: 'Logged in',
-          data: user,
-        });
-      }
-      console.log('user service : ', userId, userSession);
-      if (!userId && !userSession) {
-        return res.status(403).json({ message: 'Not logged in', status: 'error' });
-      }
-
-      delete (userSession as UserTypes).password;
-
+    if (req.isAuthenticated()) {
       return res.json({
         status: 'success',
         message: 'Logged in',
-        data: userSession,
+        data: user,
       });
-    } catch (err) {
-      console.log('error', err);
-      return res.status(500).json({ status: 'error', message: (err as Error).message });
     }
+    // console.log('user service : ', userId, userSession);
+    if (!userId && !userSession) {
+      return res.status(403).json({ message: 'Not logged in', status: 'error' });
+    }
+
+    delete (userSession as UserTypes).password;
+
+    return res.json({
+      status: 'success',
+      message: 'Logged in',
+      data: userSession,
+    });
   }
 
   /**

@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
-import { Database, Resource } from '@adminjs/mongoose'; // or any other adapter
+import { Database, Resource } from '@adminjs/mongoose';
 
 import provider from './admin/auth-provider.js';
 import options from './admin/options.js';
@@ -76,13 +76,12 @@ const start = async () => {
     }
   );
 
-  app.use(admin.options.rootPath, router);
+  // app.use(admin.options.rootPath, router);
   configurePassport();
 
   // deleteAllDocuments(ProductQuantityGroupe);
   // logger middleware
   app.use(logger);
-
   // cookie-parser to manage secure cookie
   app.use(cookieParser());
 
@@ -92,13 +91,17 @@ const start = async () => {
   // session authentication configuration
   const sessionMiddleware = expresssession({
     secret: secretKey,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
-      maxAge: 1000 * 60 * 5,
+      // maxAge: 1000 * 60 * 60 *24,
+      maxAge: 1000 * 60 * 10,
+      // TODO : change
       secure: false,
+      sameSite: 'lax',
       httpOnly: false,
     },
+    name: 'oubuntu_cookie',
   });
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -106,6 +109,16 @@ const start = async () => {
   app.use(passport.initialize());
   app.use(passport.session());
   // static files
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
   app.use('/', express.static(join(process.cwd(), 'src', 'public')));
 
   // root router

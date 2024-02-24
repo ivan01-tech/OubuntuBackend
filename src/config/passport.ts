@@ -62,9 +62,19 @@ export function configurePassport() {
     )
   );
 }
+
+// passport.serializeUser((user, done) => {
+//   console.log('serialized user : ', user);
+//   done(null, user._id);
+// });
+
 passport.serializeUser((user, done) => {
-  console.log('serialized user : ', user);
-  done(null, user._id);
+  if (user && typeof user === 'object' && '_id' in user) {
+    console.log('serialized user : ', user);
+    done(null, user._id);
+  } else {
+    done(new Error('Invalid user object'));
+  }
 });
 
 passport.deserializeUser((serializedData, done) => {
