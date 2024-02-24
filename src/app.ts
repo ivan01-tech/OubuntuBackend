@@ -39,8 +39,6 @@ import categoriesRoutes from './routes/categoriesRoutes.js';
 
 dotenv.config();
 
-const port = process.env.PORT || 3500;
-
 const PORT = process.env.PORT || 3500;
 const secretKey = process.env.EXPRESS_SESSION_KEY as string;
 const app = express();
@@ -156,18 +154,14 @@ const start = async () => {
   // listener
   mongoose.connection.once('open', () => {
     console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log('Server is running on : ', `http://localhost:${PORT}`);
-      console.log(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`);
-    });
+  });
+  app.listen(PORT, () => {
+    console.log('Server is running on : ', `http://localhost:${PORT}`);
+    console.log(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`);
   });
 
   mongoose.connection.on('error', (err) => {
     console.log(`MongoDB connection error: ${err.message}`);
-  });
-
-  app.listen(port, () => {
-    console.log(`AdminJS available at http://localhost:${port}${admin.options.rootPath}`);
   });
 };
 

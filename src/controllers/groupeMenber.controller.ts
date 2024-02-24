@@ -73,7 +73,7 @@ class GroupeMemberController {
     if (!deletedMember) {
       return res.status(404).json({ status: 'error', message: 'Member not found' });
     }
-    
+
     const userProductQ = await ProductQuantityGroupe.findOneAndDelete({
       $and: [{ group_id: groupId }, { user_id: memberId }],
     });

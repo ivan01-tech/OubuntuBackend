@@ -10,7 +10,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
     return res.status(403).json({ status: 'error', menubar: 'UnAuthenticated' });
   }
 };
-const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+export const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   if (req.isAuthenticated()) {
     return next();
   }

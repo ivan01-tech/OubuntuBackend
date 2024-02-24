@@ -12,8 +12,15 @@ export default class OfferController {
 
     let author_id: string;
 
+    const { user } = req;
+
     if (req.isAuthenticated()) {
-      author_id = req.user._id;
+      if (user && typeof user === 'object' && '_id' in user) {
+        author_id = user._id as string;
+      } else {
+        // TODO
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
+      }
     } else {
       author_id = req.session.userId;
     }

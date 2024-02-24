@@ -23,8 +23,15 @@ export class GroupController {
     const { offer_id } = req.body;
     let author_id: string;
 
+    const { user } = req;
+
     if (req.isAuthenticated()) {
-      author_id = req.user._id;
+      if (user && typeof user === 'object' && '_id' in user) {
+        author_id = user._id as string;
+      } else {
+        // TODO
+        return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
+      }
     } else {
       author_id = req.session.userId;
     }
@@ -65,39 +72,46 @@ export class GroupController {
    * @param res
    * @returns
    */
-  static async updateGroup(req: Request, res: Response) {
-    const { groupId } = req.params;
-    const { offer_id } = req.body;
+  // static async updateGroup(req: Request, res: Response) {
+  //   const { groupId } = req.params;
+  //   const { offer_id } = req.body;
 
-    let author_id: string;
+  //   let author_id: string;
 
-    if (req.isAuthenticated()) {
-      author_id = req.user._id;
-    } else {
-      author_id = req.session.userId;
-    }
+  //   const { user } = req;
 
-    if (!isValidId(groupId) || !isValidId(offer_id)) {
-      return res.status(400).json({ status: 'error', message: 'Invalid group or offer ID.' });
-    }
+  //   if (req.isAuthenticated()) {
+  //     if (user && typeof user === 'object' && '_id' in user) {
+  //       author_id = user._id as string;
+  //     } else {
+  //       // TODO
+  //       return res.status(400).json({ status: 'error', message: 'Invalid user ID.' });
+  //     }
+  //   } else {
+  //     author_id = req.session.userId;
+  //   }
 
-    const group = await Group.findById(groupId);
+  //   if (!isValidId(groupId) || !isValidId(offer_id)) {
+  //     return res.status(400).json({ status: 'error', message: 'Invalid group or offer ID.' });
+  //   }
 
-    if (!group) {
-      return res.status(404).json({ status: 'error', message: 'Group not found.' });
-    }
+  //   const group = await Group.findById(groupId);
 
-    // Mise à jour des champs nécessaires
-    group.offer_id = offer_id;
+  //   if (!group) {
+  //     return res.status(404).json({ status: 'error', message: 'Group not found.' });
+  //   }
 
-    const updatedGroup = await group.save();
+  //   // Mise à jour des champs nécessaires
+  //   group.offer_id = offer_id;
 
-    return res.status(200).json({
-      status: 'Success',
-      message: 'Group Successfully Updated!',
-      data: updatedGroup,
-    });
-  }
+  //   const updatedGroup = await group.save();
+
+  //   return res.status(200).json({
+  //     status: 'Success',
+  //     message: 'Group Successfully Updated!',
+  //     data: updatedGroup,
+  //   });
+  // }
 
   /**
    * @desc Supprime un groupe

@@ -13,7 +13,7 @@ groupsRoute
   // .put('/:groupId', GroupController.updateGroup)
   .get('/', GroupController.getAllGroups)
 
-  .patch('/:groupId', requireAuth, GroupController.updateGroup)
+  // .patch('/:groupId', requireAuth, GroupController.updateGroup)
   .get('/:groupId', requireAuth, GroupController.getGroup)
   // .post('/:groupId/users', GroupController.addUser)
   .delete('/:groupId', requireAuth, GroupController.deleteGroup)
